@@ -10,9 +10,8 @@ lmtf was born from a dissatisfaction with the state of testing for
 elisp. There seemed to be no solution that gave me the ability to run
 both simple unit tests and complex integration tests quickly and
 effortlessly. This made testing elisp code a cumbersome, manual
-process. Adding to this frustration, unit testing in `ert` became
-frustrating when I realized I had to completely restart emacs if I
-renamed or deleted a test.
+process. Adding to this frustration, I had to completely restart emacs
+if I renamed or deleted a test with `ert`.
 
 `lmtf` seeks to solve these problems through:
 
