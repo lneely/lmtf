@@ -49,25 +49,28 @@
                             (window-height . 0.3)))))
 
 (defun lmtf-run-single ()
-  "Run a single test selected from the list of discovered tests."
+  "Run a single test selected from the list of discovered tests.
+This function always runs the selected test, even if it's excluded."
   (interactive)
   (lmtf-setup)
   (let* ((all-tests (lmtf-discover-all-tests))
          (test-list (lmtf-flatten-test-list all-tests))
          (selected-test (completing-read "Select test to run: " test-list nil t)))
     (if selected-test
-        (lmtf-execute-tests (list selected-test))
+        (lmtf-execute-tests (list selected-test) t)
       (message "No test selected."))))
 
+;; TODO: implement UI for this
 (defun lmtf-run-multiple ()
-  "Run multiple tests selected from the list of discovered tests."
+  "Run multiple tests selected from the list of discovered tests.
+This function always runs the selected tests, even if they're excluded."
   (interactive)
   (lmtf-setup)
   (let* ((all-tests (lmtf-discover-all-tests))
          (test-list (lmtf-flatten-test-list all-tests))
          (selected-tests (completing-read-multiple "Select tests to run: " test-list nil t)))
     (if selected-tests
-        (lmtf-execute-tests selected-tests)
+        (lmtf-execute-tests selected-tests t)
       (message "No tests selected."))))
 
 (defun lmtf-discover-tests (file)
@@ -121,8 +124,11 @@
   (if arg
       (call-interactively 'lmtf-run-single)
     (let* ((all-tests (lmtf-discover-all-tests))
-           (test-names (mapcar #'car (apply #'append (mapcar #'cdr all-tests)))))
-      (lmtf-execute-tests test-names))))
+           (test-names (mapcar #'car (apply #'append (mapcar #'cdr all-tests))))
+           (non-excluded-tests (cl-remove-if (lambda (test-name)
+                                               (get (intern-soft test-name) 'excluded))
+                                             test-names)))
+      (lmtf-execute-tests non-excluded-tests))))
 
 (defun lmtf-find-test-files ()
   "Find all Emacs Lisp test files in the test directory."
@@ -157,7 +163,8 @@ If TEST-NAME is provided, include the associated filename in the log."
 (defun lmtf-setup ()
   "Set up the environment for running tests."
   (let ((test-dir (lmtf-get-test-directory)))
-    (add-to-list 'load-path test-dir)))
+    (add-to-list 'load-path test-dir))
+  (lmtf-clear-exclusions))
 
 (defun lmtf-flatten-test-list (all-tests)
   "Flatten the nested list of ALL-TESTS into a single list of test names."
@@ -198,27 +205,36 @@ If TEST-NAME is provided, include the associated filename in the log."
       (lmtf-log (format "Test %s not found" test-name) test-name)
       'fail))))
 
-(defun lmtf-execute-tests (test-names)
-  "Execute tests with TEST-NAMES (a list of test name strings)."
+(defun lmtf-execute-tests (test-names &optional run-excluded)
+  "Execute tests with TEST-NAMES (a list of test name strings).
+If RUN-EXCLUDED is non-nil, also run excluded tests."
   (if test-names
-      (let ((all-passed t))
+      (let ((all-passed t)
+            (tests-run 0)
+            (tests-excluded 0))
         (dolist (file (lmtf-find-test-files))
           (load-file file))
         
         (catch 'test-failed
           (dolist (test-name test-names)
-            (let ((result (lmtf-execute-single-test test-name)))
-              (cond
-               ((eq result 'pass)
-                (lmtf-log (format "%s: PASS" test-name) test-name))
-               ((eq result 'fail)
-                (lmtf-log (format "%s: FAIL" test-name) test-name)
-                (setq all-passed nil)
-                (throw 'test-failed nil))))))
+            (let ((func-symbol (intern-soft test-name)))
+              (if (and (get func-symbol 'excluded) (not run-excluded))
+                  (progn
+                    (lmtf-log (format "%s: EXCLUDED" test-name) test-name)
+                    (setq tests-excluded (1+ tests-excluded)))
+                (let ((result (lmtf-execute-single-test test-name)))
+                  (setq tests-run (1+ tests-run))
+                  (cond
+                   ((eq result 'pass)
+                    (lmtf-log (format "%s: PASS" test-name) test-name))
+                   ((eq result 'fail)
+                    (lmtf-log (format "%s: FAIL" test-name) test-name)
+                    (setq all-passed nil)
+                    (throw 'test-failed nil))))))))
         
         (if all-passed
-            (lmtf-log "All tests passed.")
-          (lmtf-log "Tests failed. Stopping execution.")))
+            (lmtf-log (format "All tests passed. Ran %d tests, excluded %d tests." tests-run tests-excluded))
+          (lmtf-log (format "Tests failed. Ran %d tests, excluded %d tests. Stopping execution." tests-run tests-excluded))))
     (lmtf-log "No tests found to run.")))
 
 (defun lmtf-exclude (&rest test-functions)
@@ -228,5 +244,13 @@ TEST-FUNCTIONS should be a list of function names (symbols or strings)."
     (let ((func-symbol (if (symbolp func) func (intern func))))
       (put func-symbol 'excluded t)
       (message "Excluded test: %s" func-symbol))))
+
+(defun lmtf-clear-exclusions ()
+  "Clear all test exclusions."
+  (maphash (lambda (test-name _)
+             (let ((func-symbol (intern-soft test-name)))
+               (when func-symbol
+                 (put func-symbol 'excluded nil))))
+           lmtf-test-file-map))
 
 (provide 'lmtf)
