@@ -15,7 +15,6 @@
 ;; <https://www.gnu.org/licenses/>.
 ;;
 
-
 (require 'ert)
 
 (defvar lmtf-test-directory "tests"
