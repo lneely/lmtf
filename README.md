@@ -40,17 +40,35 @@ Add the following to your Emacs configuration:
 
 ### Manual Installation
 
+Replace `$EMACSDIR` with the location of your emacs configuration,
+e.g., `~/.config/emacs` or `~/.emacs.d`. 
+
 1. Clone the lmtf repository:
    ```
-   git clone https://github.com/lneely/lmtf.git ~/.emacs.d/lmtf
+   git clone https://github.com/lneely/lmtf.git $EMACSDIR/lmtf
    ```
 
 2. Add the following to your Emacs configuration:
    ```elisp
-   (add-to-list 'load-path "~/.emacs.d/lmtf")
+   (add-to-list 'load-path "~/$EMACSDIR/lmtf")
    (require 'lmtf)
-   (lmtf-mode 1)
+   :bind (:map emacs-lisp-mode-map
+            ("C-c C-t" . lmtf-run-all-tests)))
    ```
+
+### Key Bindings
+
+`lmtf` does not provide any default key bindings. Here are some
+recommendations for a vanilla emacs configuration (i.e., no doom or
+spacemacs):
+
+```elisp
+(define-key emacs-lisp-mode-map (kbd "C-c t !") #'lmtf-run-all-tests)
+(define-key emacs-lisp-mode-map (kbd "C-c t r") #'lmtf-show-results)
+```
+
+Note that you can use the universal prefix `C-u` on `C-c t !` to run a
+single test instead of all tests.
 
 ## Usage
 
