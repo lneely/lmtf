@@ -94,7 +94,8 @@ discovered by lmtf.
 
 `lmtf` supports custom test functions, and custom functions may use
 `ert` assertions or an error condition to indicate pass/fail. A custom
-test with `ert` assertions looks exactly like an `ert` test.
+test with `ert` assertions looks exactly like an `ert` test, but uses 
+`defun` instead of the `ert-deftest` macro.
 
 ```elisp
 (defun test-addition ()
@@ -132,6 +133,16 @@ the `lmtf-test-directory`.
 
 - To run all tests: `M-x lmtf-run-all-tests`
 - To run a single test: `M-x lmtf-run-single`
+
+### Excluding Tests
+
+Sometimes it is desirable to exclude certain tests from the automated test 
+run. To do this:
+
+```elisp
+(lmtf-exclude 'test-to-exclude-1
+              'test-to-exclude-2) ;; and so on...
+```
 
 ## License
 
