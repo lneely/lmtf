@@ -36,7 +36,7 @@ Add the following to your Emacs configuration:
   :straight (lmtf :type git :host github :repo "lneely/lmtf")
      :bind (:map emacs-lisp-mode-map
             ("C-c t !" . lmtf-run-all-tests)
-            ("C-c t r) . lmtf-show-results))
+            ("C-c t r") . lmtf-show-results))
 ```
 
 ### Manual Installation
