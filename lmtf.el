@@ -212,8 +212,21 @@ If RUN-EXCLUDED is non-nil, also run excluded tests."
       (let ((all-passed t)
             (tests-run 0)
             (tests-excluded 0))
+        ;; Undefine and redefine all test functions
         (dolist (file (lmtf-find-test-files))
-          (load-file file))
+          (with-temp-buffer
+            (insert-file-contents file)
+            (goto-char (point-min))
+            (while (re-search-forward "^\\s-*(\\(defun\\|ert-deftest\\)\\s-+\\(\\_<.*?\\_>\\)" nil t)
+              (let ((def-type (match-string 1))
+                    (func-name (match-string 2)))
+                (cond
+                 ((string= def-type "defun")
+                  (fmakunbound (intern func-name)))
+                 ((string= def-type "ert-deftest")
+                  (ert-delete-test (intern func-name))))))
+            (goto-char (point-min))
+            (eval-buffer)))
         
         (catch 'test-failed
           (dolist (test-name test-names)
