@@ -15,7 +15,8 @@ if I renamed or deleted a test with `ert`.
 
 `lmtf` seeks to solve these problems through:
 
-- Automatic, project-aware test discovery which does not 
+- Automatic, project-aware test discovery which does not require
+  restarting emacs as the tests change. 
 - Support for both `ert` unit tests and custom tests
 - Ability to run all tests or a single test using an interactive user
   interface
