@@ -16,7 +16,7 @@ renamed or deleted a test.
 
 `lmtf` seeks to solve these problems through:
 
-- Automatic, project-aware test discovery
+- Automatic, project-aware test discovery which does not 
 - Support for both `ert` unit tests and custom tests
 - Ability to run all tests or a single test using an interactive user
   interface
@@ -95,9 +95,9 @@ to fail. If the error state is not entered, then the test passes.
 ### ERT Tests
 
 `lmtf` supports running `ert` tests. A benefit of this feature is that
-existing `ert` tests can be run by `lmtf`, so long as they are named
-according to the convention and they reside in the
-`lmtf-test-directory`.
+existing `ert` tests can be run by `lmtf` without modification, so
+long as they are named according to the convention and they reside in
+the `lmtf-test-directory`.
 
 ```elisp
 (require 'ert)
