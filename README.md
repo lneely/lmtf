@@ -34,8 +34,9 @@ Add the following to your Emacs configuration:
 ```elisp
 (use-package lmtf
   :straight (lmtf :type git :host github :repo "lneely/lmtf")
-  :config
-  (lmtf-mode 1))
+     :bind (:map emacs-lisp-mode-map
+            ("C-c t !" . lmtf-run-all-tests)
+			("C-c t r) . lmtf-show-results))
 ```
 
 ### Manual Installation
@@ -52,8 +53,10 @@ e.g., `~/.config/emacs` or `~/.emacs.d`.
    ```elisp
    (add-to-list 'load-path "~/$EMACSDIR/lmtf")
    (require 'lmtf)
-   :bind (:map emacs-lisp-mode-map
-            ("C-c C-t" . lmtf-run-all-tests)))
+   
+   ;; recommended key bindings
+   (define-key emacs-lisp-mode-map (kbd "C-c t !") #'lmtf-run-all-tests)
+   (define-key emacs-lisp-mode-map (kbd "C-c t r") #'lmtf-show-results)
    ```
 
 ### Key Bindings
