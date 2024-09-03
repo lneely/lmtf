@@ -145,6 +145,11 @@ containing the test to be excluded:
               'test-to-exclude-2) ;; and so on...
 ```
 
+### Samples
+
+For more information on how to write and organize your tests, refer to the 
+`tests` subdirectory of this project.
+
 ## License
 
 LispyMcTestFace (lmtf) - A lightweight, multipurpose testing framework
