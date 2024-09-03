@@ -137,7 +137,8 @@ the `lmtf-test-directory`.
 ### Excluding Tests
 
 Sometimes it is desirable to exclude certain tests from the automated test 
-run. To do this:
+run. To exclude a test, add something like this to the end of the test file
+containing the test to be excluded:
 
 ```elisp
 (lmtf-exclude 'test-to-exclude-1
